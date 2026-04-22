@@ -1,0 +1,47 @@
+INICIO ALNS_Tasf_B2B
+    // 1. Inicialización del Entorno Logístico
+    Plan_Rutas_Actual = Generar_Plan_Inicial_Factible(Maletas, Red_Vuelos)
+    Mejor_Plan_Global = Plan_Rutas_Actual
+    
+    // 2. Inicialización de Operadores y Parámetros
+    // Operadores de Destrucción (D): Ej. Quitar maletas con SLA vencido, quitar maletas de vuelos llenos
+    Asignar_Pesos_Iniciales_Iguales(Operadores_Destruccion)
+    
+    // Operadores de Reparación (R): Ej. Inserción Greedy (rápida), Inserción con Regret (previsora)
+    Asignar_Pesos_Iniciales_Iguales(Operadores_Reparacion)
+    
+    Temperatura_SA = Configurar_Temperatura_Inicial() // Para Simulated Annealing
+    
+    MIENTRAS (condicion_de_parada NO se cumpla) HACER
+        
+        // 3. Selección Adaptativa (Ruleta)
+        Op_Destruccion_Seleccionado = Seleccionar_Por_Ruleta(Operadores_Destruccion, pesos_D)
+        Op_Reparacion_Seleccionado = Seleccionar_Por_Ruleta(Operadores_Reparacion, pesos_R)
+        
+        // 4. Modificación de la Solución (Fase de Búsqueda de Vecindades Grandes)
+        // Se desasignan entre un 10% y 40% de las maletas del plan actual
+        Plan_Parcial_Sin_Maletas = Op_Destruccion_Seleccionado(Plan_Rutas_Actual, Porcentaje_Remocion)
+        
+        // Se reinsertan las maletas cuidando capacidades (150-400) y almacenes (500-800)
+        Nuevo_Plan_Rutas = Op_Reparacion_Seleccionado(Plan_Parcial_Sin_Maletas)
+        
+        // 5. Criterio de Aceptación (Simulated Annealing)
+        SI (Aceptar_Nuevo_Plan(Nuevo_Plan_Rutas, Plan_Rutas_Actual, Temperatura_SA)) ENTONCES
+            Plan_Rutas_Actual = Nuevo_Plan_Rutas
+        FIN SI
+        
+        // 6. Actualización del Mejor Plan Histórico
+        SI (Calcular_Costo(Nuevo_Plan_Rutas) < Calcular_Costo(Mejor_Plan_Global)) ENTONCES
+            Mejor_Plan_Global = Nuevo_Plan_Rutas
+        FIN SI
+        
+        // 7. Adaptación (Aprendizaje del Algoritmo)
+        Actualizar_Puntaje_Operadores(Op_Destruccion_Seleccionado, Op_Reparacion_Seleccionado, Rendimiento_Obtenido)
+        Recalcular_Pesos(Operadores_Destruccion, Operadores_Reparacion)
+        
+        Temperatura_SA = Enfriar_Temperatura(Temperatura_SA)
+        
+    FIN MIENTRAS
+    
+    RETORNAR Mejor_Plan_Global
+FIN ALNS_Tasf_B2B
