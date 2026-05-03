@@ -384,7 +384,7 @@ public class Test {
             while ((linea = br.readLine()) != null) {
                 String[] cols = linea.split(",");
                 if (cols.length >= 14 && cols[1].equals("RESUMEN")) {
-                    System.out.printf("║ %,9s ║ %,7s ║ %,9s ║ %,8s ║ %7s%% ║ %7s%% ║ %8s ║ %8s m ║ %7s s ║ %7s ║ %6s%% ║ %7s s ║%n",
+                    System.out.printf("║ %9s ║ %7s ║ %9s ║ %8s ║ %7s%% ║ %7s%% ║ %8s ║ %8s m ║ %7s s ║ %7s ║ %6s%% ║ %7s s ║%n",
                             cols[0], cols[2], cols[5], cols[6], cols[7], cols[8],
                             abreviar(cols[9]), cols[10], cols[3], cols[11], cols[12], cols[13]);
                 }
