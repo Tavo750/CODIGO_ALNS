@@ -12,9 +12,9 @@ import java.util.*;
  * del traslado de maletas de Tasf.B2B.
  *
  * Métricas evaluadas por experimento:
- *   Iteracion, Tiempo_Ejecucion, Envios_Total, Envios_Asignados, Envios_Fallidos,
+ *   Maletas, Tiempo_Ejecucion, Envios_Total, Envios_Asignados, Envios_Fallidos,
  *   Pct_Asignados, Pct_Entregas_Tiempo, Costo_Solucion, Tiempo_Entrega,
- *   Consumo_Memoria, Consumo_CPU.
+ *   Consumo_Memoria, Consumo_CPU_Pct, Consumo_CPU_seg.
  *
  * Escenarios de carga: 2000, 4000, 6000, 8000 y 10000 envíos.
  */
@@ -108,9 +108,9 @@ public class Test {
         // ─── 3. Preparar archivo CSV de resultados ───
         String csvPath = dataDir + "/test_resultados.csv";
         PrintWriter csv = new PrintWriter(new FileWriter(csvPath));
-        csv.println("Escenario,Dia,Iteracion,Tiempo_Ejecucion_seg,Envios_Total,Envios_Asignados,"
+        csv.println("Escenario,Dia,Maletas,Tiempo_Ejecucion_seg,Envios_Total,Envios_Asignados,"
                 + "Envios_Fallidos,Pct_Asignados,Pct_Entregas_Tiempo,Costo_Solucion,"
-                + "Tiempo_Entrega_Prom_min,Consumo_Memoria_MB,Consumo_CPU_seg");
+                + "Tiempo_Entrega_Prom_min,Consumo_Memoria_MB,Consumo_CPU_Pct,Consumo_CPU_seg");
 
         // Preparar JSON para dashboard
         StringBuilder json = new StringBuilder("{\n  \"experimentos\": [\n");
@@ -135,11 +135,13 @@ public class Test {
             // Variables acumuladas del escenario
             int totalEnviosProc = 0, totalAsignados = 0, totalFallidos = 0;
             int totalATiempo = 0, totalConRuta = 0;
+            int totalMaletasFisicas = 0;
             double costoAcumulado = 0;
             long tiempoEntregaAcumulado = 0;
             int rutasConTiempo = 0;
             double tiempoEjecTotal = 0;
             double cpuTotal = 0;
+            double cpuPctAcumulado = 0;
             double memoriaPico = 0;
             List<Maleta> arrastre = new ArrayList<>();
 
@@ -196,6 +198,10 @@ public class Test {
                 // Medir CPU después
                 long cpuDespues = cpuSupported ? threadBean.getCurrentThreadCpuTime() : 0;
                 double cpuSeg = (cpuDespues - cpuAntes) / 1_000_000_000.0;
+                double cpuPct = tiempoEjec > 0 ? (cpuSeg / tiempoEjec) * 100.0 : 0;
+
+                // Contar maletas físicas del día
+                int maletasFisicasDia = mejorPlan.getTotalMaletasFisicas();
 
                 // Medir memoria después
                 long memDespues = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -231,15 +237,17 @@ public class Test {
                 costoAcumulado += costoSolucion;
                 tiempoEntregaAcumulado += sumaTiempoEntrega;
                 rutasConTiempo += countRutas;
+                totalMaletasFisicas += maletasFisicasDia;
                 tiempoEjecTotal += tiempoEjec;
                 cpuTotal += cpuSeg;
+                cpuPctAcumulado += cpuPct;
                 if (memUsadaMB > memoriaPico) memoriaPico = memUsadaMB;
 
                 // Arrastre
                 arrastre.addAll(mejorPlan.getMaletasNoAsignadas());
 
                 // Imprimir resultados del día
-                System.out.printf("     Iteraciones ALNS:     %d%n", MAX_ITERACIONES);
+                System.out.printf("     Maletas (físicas):    %d%n", maletasFisicasDia);
                 System.out.printf("     Tiempo ejecución:     %.3f seg%n", tiempoEjec);
                 System.out.printf("     Envíos total:         %d%n", enviosDiaTotal);
                 System.out.printf("     Envíos asignados:     %d%n", asignados);
@@ -249,20 +257,20 @@ public class Test {
                 System.out.printf("     Costo solución:       %.2f%n", costoSolucion);
                 System.out.printf("     Tiempo entrega prom:  %.1f min%n", tiempoEntregaProm);
                 System.out.printf("     Memoria usada:        %.1f MB%n", memUsadaMB);
-                System.out.printf("     CPU usado:            %.3f seg%n", cpuSeg);
+                System.out.printf("     CPU usado:            %.2f%% (%.3f seg)%n", cpuPct, cpuSeg);
 
                 // Escribir CSV
-                csv.printf("%d,%s,%d,%.3f,%d,%d,%d,%.2f,%.2f,%.2f,%.1f,%.1f,%.3f%n",
-                        numEnvios, TimeUtils.dayIndexToDate(dayIndex), MAX_ITERACIONES,
+                csv.printf("%d,%s,%d,%.3f,%d,%d,%d,%.2f,%.2f,%.2f,%.1f,%.1f,%.2f,%.3f%n",
+                        numEnvios, TimeUtils.dayIndexToDate(dayIndex), maletasFisicasDia,
                         tiempoEjec, enviosDiaTotal, asignados, fallidos,
                         pctAsignados, pctATiempo, costoSolucion,
-                        tiempoEntregaProm, memUsadaMB, cpuSeg);
+                        tiempoEntregaProm, memUsadaMB, cpuPct, cpuSeg);
 
                 // JSON por día
                 if (d > 0) json.append(",\n");
                 json.append("        {\n");
                 json.append("          \"dia\": \"").append(TimeUtils.dayIndexToDate(dayIndex)).append("\",\n");
-                json.append(String.format("          \"iteracion\": %d,\n", MAX_ITERACIONES));
+                json.append(String.format("          \"maletas\": %d,\n", maletasFisicasDia));
                 json.append(String.format("          \"tiempoEjecucion\": %.3f,\n", tiempoEjec));
                 json.append(String.format("          \"enviosTotal\": %d,\n", enviosDiaTotal));
                 json.append(String.format("          \"enviosAsignados\": %d,\n", asignados));
@@ -272,6 +280,7 @@ public class Test {
                 json.append(String.format("          \"costoSolucion\": %.2f,\n", costoSolucion));
                 json.append(String.format("          \"tiempoEntregaProm\": %.1f,\n", tiempoEntregaProm));
                 json.append(String.format("          \"consumoMemoriaMB\": %.1f,\n", memUsadaMB));
+                json.append(String.format("          \"consumoCPUPct\": %.2f,\n", cpuPct));
                 json.append(String.format("          \"consumoCPUSeg\": %.3f\n", cpuSeg));
                 json.append("        }");
 
@@ -289,8 +298,11 @@ public class Test {
             double pctATiempoGlobal = totalConRuta > 0 ? (totalATiempo * 100.0 / totalConRuta) : 0;
             double tiempoEntregaGlobal = rutasConTiempo > 0 ? (tiempoEntregaAcumulado / (double) rutasConTiempo) : 0;
 
+            double cpuPctPromedio = DIAS_SIMULACION > 0 ? (cpuPctAcumulado / DIAS_SIMULACION) : 0;
+
             json.append(String.format("      \"resumen\": {\n"));
             json.append(String.format("        \"totalEnvios\": %d,\n", totalEnviosProc));
+            json.append(String.format("        \"totalMaletas\": %d,\n", totalMaletasFisicas));
             json.append(String.format("        \"totalAsignados\": %d,\n", totalAsignados));
             json.append(String.format("        \"totalFallidos\": %d,\n", totalFallidos));
             json.append(String.format("        \"pctAsignados\": %.2f,\n", pctAsigGlobal));
@@ -299,16 +311,17 @@ public class Test {
             json.append(String.format("        \"tiempoEntregaProm\": %.1f,\n", tiempoEntregaGlobal));
             json.append(String.format("        \"tiempoEjecTotal\": %.3f,\n", tiempoEjecTotal));
             json.append(String.format("        \"memoriaPicoMB\": %.1f,\n", memoriaPico));
+            json.append(String.format("        \"cpuPromPct\": %.2f,\n", cpuPctPromedio));
             json.append(String.format("        \"cpuTotalSeg\": %.3f\n", cpuTotal));
             json.append("      }\n");
             json.append("    }");
 
             // Escribir fila resumen en CSV
-            csv.printf("%d,RESUMEN,%d,%.3f,%d,%d,%d,%.2f,%.2f,%.2f,%.1f,%.1f,%.3f%n",
-                    numEnvios, MAX_ITERACIONES * DIAS_SIMULACION,
+            csv.printf("%d,RESUMEN,%d,%.3f,%d,%d,%d,%.2f,%.2f,%.2f,%.1f,%.1f,%.2f,%.3f%n",
+                    numEnvios, totalMaletasFisicas,
                     tiempoEjecTotal, totalEnviosProc, totalAsignados, totalFallidos,
                     pctAsigGlobal, pctATiempoGlobal, costoAcumulado,
-                    tiempoEntregaGlobal, memoriaPico, cpuTotal);
+                    tiempoEntregaGlobal, memoriaPico, cpuPctPromedio, cpuTotal);
 
             System.out.println();
             System.out.println("┌──────────────────────────────────────────────────────────────┐");
@@ -322,15 +335,16 @@ public class Test {
             System.out.printf( "│  Tiempo entrega prom:    %10.1f min                      │%n", tiempoEntregaGlobal);
             System.out.printf( "│  Tiempo ejecución total: %10.3f seg                      │%n", tiempoEjecTotal);
             System.out.printf( "│  Memoria pico:           %10.1f MB                       │%n", memoriaPico);
-            System.out.printf( "│  CPU total:              %10.3f seg                      │%n", cpuTotal);
+            System.out.printf( "│  Maletas físicas total:  %,10d                          │%n", totalMaletasFisicas);
+            System.out.printf( "│  CPU total:              %10.3f seg (prom %.2f%%)          │%n", cpuTotal, cpuPctPromedio);
             System.out.println("└──────────────────────────────────────────────────────────────┘");
             System.out.println();
 
             // Reset acumuladores para siguiente escenario
             totalEnviosProc = 0; totalAsignados = 0; totalFallidos = 0;
-            totalATiempo = 0; totalConRuta = 0;
+            totalATiempo = 0; totalConRuta = 0; totalMaletasFisicas = 0;
             costoAcumulado = 0; tiempoEntregaAcumulado = 0; rutasConTiempo = 0;
-            tiempoEjecTotal = 0; cpuTotal = 0; memoriaPico = 0;
+            tiempoEjecTotal = 0; cpuTotal = 0; cpuPctAcumulado = 0; memoriaPico = 0;
 
             System.gc();
         }
@@ -360,24 +374,24 @@ public class Test {
         System.out.println();
         System.out.println("╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║                           TABLA COMPARATIVA DE ESCENARIOS                                                     ║");
-        System.out.println("╠═══════════╦═══════════╦══════════╦══════════╦══════════╦══════════╦════════════╦══════════╦═════════╦══════════╣");
-        System.out.println("║ Escenario ║ Asignados ║ Fallidos ║ %Asig    ║ %Tiempo  ║ Costo   ║ T.Entrega  ║ T.Ejec   ║ Mem MB  ║ CPU seg  ║");
-        System.out.println("╠═══════════╬═══════════╬══════════╬══════════╬══════════╬══════════╬════════════╬══════════╬═════════╬══════════╣");
+        System.out.println("╠═══════════╦═════════╦═══════════╦══════════╦══════════╦══════════╦══════════╦════════════╦══════════╦═════════╦═════════╦══════════╣");
+        System.out.println("║ Escenario ║ Maletas ║ Asignados ║ Fallidos ║ %Asig    ║ %Tiempo  ║ Costo   ║ T.Entrega  ║ T.Ejec   ║ Mem MB  ║ CPU %   ║ CPU seg  ║");
+        System.out.println("╠═══════════╬═════════╬═══════════╬══════════╬══════════╬══════════╬══════════╬════════════╬══════════╬═════════╬═════════╬══════════╣");
 
         try (BufferedReader br = new BufferedReader(new FileReader(csvPath))) {
             String linea;
             br.readLine(); // skip header
             while ((linea = br.readLine()) != null) {
                 String[] cols = linea.split(",");
-                if (cols.length >= 13 && cols[1].equals("RESUMEN")) {
-                    System.out.printf("║ %,9s ║ %,9s ║ %,8s ║ %7s%% ║ %7s%% ║ %8s ║ %8s m ║ %7s s ║ %7s ║ %7s s ║%n",
-                            cols[0], cols[5], cols[6], cols[7], cols[8],
-                            abreviar(cols[9]), cols[10], cols[3], cols[11], cols[12]);
+                if (cols.length >= 14 && cols[1].equals("RESUMEN")) {
+                    System.out.printf("║ %,9s ║ %,7s ║ %,9s ║ %,8s ║ %7s%% ║ %7s%% ║ %8s ║ %8s m ║ %7s s ║ %7s ║ %6s%% ║ %7s s ║%n",
+                            cols[0], cols[2], cols[5], cols[6], cols[7], cols[8],
+                            abreviar(cols[9]), cols[10], cols[3], cols[11], cols[12], cols[13]);
                 }
             }
         }
 
-        System.out.println("╚═══════════╩═══════════╩══════════╩══════════╩══════════╩══════════╩════════════╩══════════╩═════════╩══════════╝");
+        System.out.println("╚═══════════╩═════════╩═══════════╩══════════╩══════════╩══════════╩══════════╩════════════╩══════════╩═════════╩═════════╩══════════╝");
     }
 
     /** Abrevia números grandes para la tabla */
