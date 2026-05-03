@@ -6,7 +6,7 @@
         {
           "dia": "2028-12-05",
           "maletas": 689,
-          "tiempoEjecucion": 32.974,
+          "tiempoEjecucion": 5.330,
           "enviosTotal": 416,
           "enviosAsignados": 416,
           "enviosFallidos": 0,
@@ -14,14 +14,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 198465.25,
           "tiempoEntregaProm": 521.4,
-          "consumoMemoriaMB": 2324.2,
-          "consumoCPUPct": 95.96,
-          "consumoCPUSeg": 31.641
+          "consumoMemoriaMB": 2836.4,
+          "consumoCPUPct": 98.21,
+          "consumoCPUSeg": 5.234
         },
         {
           "dia": "2028-12-06",
           "maletas": 674,
-          "tiempoEjecucion": 30.480,
+          "tiempoEjecucion": 6.204,
           "enviosTotal": 412,
           "enviosAsignados": 412,
           "enviosFallidos": 0,
@@ -29,14 +29,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 180019.80,
           "tiempoEntregaProm": 507.1,
-          "consumoMemoriaMB": 1995.2,
-          "consumoCPUPct": 95.35,
-          "consumoCPUSeg": 29.063
+          "consumoMemoriaMB": 2135.9,
+          "consumoCPUPct": 96.46,
+          "consumoCPUSeg": 5.984
         },
         {
           "dia": "2028-12-07",
           "maletas": 677,
-          "tiempoEjecucion": 25.076,
+          "tiempoEjecucion": 3.231,
           "enviosTotal": 408,
           "enviosAsignados": 408,
           "enviosFallidos": 0,
@@ -44,14 +44,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 196236.55,
           "tiempoEntregaProm": 533.6,
-          "consumoMemoriaMB": 2263.2,
-          "consumoCPUPct": 94.40,
-          "consumoCPUSeg": 23.672
+          "consumoMemoriaMB": 2049.9,
+          "consumoCPUPct": 94.78,
+          "consumoCPUSeg": 3.063
         },
         {
           "dia": "2028-12-08",
           "maletas": 683,
-          "tiempoEjecucion": 30.785,
+          "tiempoEjecucion": 4.919,
           "enviosTotal": 369,
           "enviosAsignados": 369,
           "enviosFallidos": 0,
@@ -59,14 +59,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 208966.60,
           "tiempoEntregaProm": 559.0,
-          "consumoMemoriaMB": 1957.2,
-          "consumoCPUPct": 95.72,
-          "consumoCPUSeg": 29.469
+          "consumoMemoriaMB": 2369.1,
+          "consumoCPUPct": 90.85,
+          "consumoCPUSeg": 4.469
         },
         {
           "dia": "2028-12-09",
           "maletas": 677,
-          "tiempoEjecucion": 34.904,
+          "tiempoEjecucion": 5.197,
           "enviosTotal": 395,
           "enviosAsignados": 395,
           "enviosFallidos": 0,
@@ -74,9 +74,9 @@
           "pctEntregasTiempo": 99.49,
           "costoSolucion": 195645.91,
           "tiempoEntregaProm": 513.3,
-          "consumoMemoriaMB": 2306.2,
-          "consumoCPUPct": 95.49,
-          "consumoCPUSeg": 33.328
+          "consumoMemoriaMB": 2810.1,
+          "consumoCPUPct": 95.31,
+          "consumoCPUSeg": 4.953
         }
       ],
       "resumen": {
@@ -88,10 +88,10 @@
         "pctEntregasTiempo": 99.90,
         "costoTotal": 979334.11,
         "tiempoEntregaProm": 526.3,
-        "tiempoEjecTotal": 154.219,
-        "memoriaPicoMB": 2324.2,
-        "cpuPromPct": 95.38,
-        "cpuTotalSeg": 147.172
+        "tiempoEjecTotal": 24.881,
+        "memoriaPicoMB": 2836.4,
+        "cpuPromPct": 95.12,
+        "cpuTotalSeg": 23.703
       }
     },
     {
@@ -100,7 +100,7 @@
         {
           "dia": "2028-12-05",
           "maletas": 1359,
-          "tiempoEjecucion": 153.126,
+          "tiempoEjecucion": 24.594,
           "enviosTotal": 874,
           "enviosAsignados": 874,
           "enviosFallidos": 0,
@@ -108,14 +108,14 @@
           "pctEntregasTiempo": 99.77,
           "costoSolucion": 386206.30,
           "tiempoEntregaProm": 549.3,
-          "consumoMemoriaMB": 2080.7,
-          "consumoCPUPct": 96.23,
-          "consumoCPUSeg": 147.359
+          "consumoMemoriaMB": 2268.7,
+          "consumoCPUPct": 95.55,
+          "consumoCPUSeg": 23.500
         },
         {
           "dia": "2028-12-06",
           "maletas": 1375,
-          "tiempoEjecucion": 115.597,
+          "tiempoEjecucion": 23.132,
           "enviosTotal": 824,
           "enviosAsignados": 824,
           "enviosFallidos": 0,
@@ -123,14 +123,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 417730.20,
           "tiempoEntregaProm": 554.8,
-          "consumoMemoriaMB": 1995.8,
-          "consumoCPUPct": 95.20,
-          "consumoCPUSeg": 110.047
+          "consumoMemoriaMB": 2741.7,
+          "consumoCPUPct": 95.17,
+          "consumoCPUSeg": 22.016
         },
         {
           "dia": "2028-12-07",
           "maletas": 1466,
-          "tiempoEjecucion": 145.239,
+          "tiempoEjecucion": 31.497,
           "enviosTotal": 828,
           "enviosAsignados": 828,
           "enviosFallidos": 0,
@@ -138,14 +138,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 422505.65,
           "tiempoEntregaProm": 535.1,
-          "consumoMemoriaMB": 3054.8,
-          "consumoCPUPct": 96.02,
-          "consumoCPUSeg": 139.453
+          "consumoMemoriaMB": 2096.9,
+          "consumoCPUPct": 95.74,
+          "consumoCPUSeg": 30.156
         },
         {
           "dia": "2028-12-08",
           "maletas": 1216,
-          "tiempoEjecucion": 108.572,
+          "tiempoEjecucion": 19.568,
           "enviosTotal": 684,
           "enviosAsignados": 684,
           "enviosFallidos": 0,
@@ -153,14 +153,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 364661.40,
           "tiempoEntregaProm": 556.3,
-          "consumoMemoriaMB": 3209.0,
-          "consumoCPUPct": 96.11,
-          "consumoCPUSeg": 104.344
+          "consumoMemoriaMB": 1896.6,
+          "consumoCPUPct": 95.58,
+          "consumoCPUSeg": 18.703
         },
         {
           "dia": "2028-12-09",
           "maletas": 1462,
-          "tiempoEjecucion": 184.383,
+          "tiempoEjecucion": 14.856,
           "enviosTotal": 790,
           "enviosAsignados": 790,
           "enviosFallidos": 0,
@@ -168,9 +168,9 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 417472.36,
           "tiempoEntregaProm": 521.7,
-          "consumoMemoriaMB": 3284.8,
-          "consumoCPUPct": 94.73,
-          "consumoCPUSeg": 174.672
+          "consumoMemoriaMB": 2797.4,
+          "consumoCPUPct": 95.39,
+          "consumoCPUSeg": 14.172
         }
       ],
       "resumen": {
@@ -182,10 +182,10 @@
         "pctEntregasTiempo": 99.95,
         "costoTotal": 2008575.91,
         "tiempoEntregaProm": 543.2,
-        "tiempoEjecTotal": 706.917,
-        "memoriaPicoMB": 3284.8,
-        "cpuPromPct": 95.66,
-        "cpuTotalSeg": 675.875
+        "tiempoEjecTotal": 113.647,
+        "memoriaPicoMB": 2797.4,
+        "cpuPromPct": 95.49,
+        "cpuTotalSeg": 108.547
       }
     },
     {
@@ -194,7 +194,7 @@
         {
           "dia": "2028-12-05",
           "maletas": 2251,
-          "tiempoEjecucion": 477.517,
+          "tiempoEjecucion": 56.479,
           "enviosTotal": 1326,
           "enviosAsignados": 1326,
           "enviosFallidos": 0,
@@ -202,14 +202,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 676925.70,
           "tiempoEntregaProm": 545.9,
-          "consumoMemoriaMB": 2919.8,
-          "consumoCPUPct": 95.16,
-          "consumoCPUSeg": 454.422
+          "consumoMemoriaMB": 1935.8,
+          "consumoCPUPct": 96.22,
+          "consumoCPUSeg": 54.344
         },
         {
           "dia": "2028-12-06",
           "maletas": 2158,
-          "tiempoEjecucion": 285.637,
+          "tiempoEjecucion": 40.526,
           "enviosTotal": 1288,
           "enviosAsignados": 1288,
           "enviosFallidos": 0,
@@ -217,14 +217,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 632056.15,
           "tiempoEntregaProm": 531.2,
-          "consumoMemoriaMB": 3161.2,
-          "consumoCPUPct": 96.50,
-          "consumoCPUSeg": 275.641
+          "consumoMemoriaMB": 2525.0,
+          "consumoCPUPct": 96.43,
+          "consumoCPUSeg": 39.078
         },
         {
           "dia": "2028-12-07",
           "maletas": 2118,
-          "tiempoEjecucion": 269.678,
+          "tiempoEjecucion": 26.621,
           "enviosTotal": 1180,
           "enviosAsignados": 1180,
           "enviosFallidos": 0,
@@ -232,14 +232,14 @@
           "pctEntregasTiempo": 99.92,
           "costoSolucion": 648207.45,
           "tiempoEntregaProm": 546.2,
-          "consumoMemoriaMB": 2810.8,
-          "consumoCPUPct": 96.22,
-          "consumoCPUSeg": 259.484
+          "consumoMemoriaMB": 3052.8,
+          "consumoCPUPct": 97.90,
+          "consumoCPUSeg": 26.063
         },
         {
           "dia": "2028-12-08",
           "maletas": 1810,
-          "tiempoEjecucion": 243.323,
+          "tiempoEjecucion": 20.140,
           "enviosTotal": 1016,
           "enviosAsignados": 1016,
           "enviosFallidos": 0,
@@ -247,14 +247,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 560318.55,
           "tiempoEntregaProm": 555.9,
-          "consumoMemoriaMB": 2554.9,
-          "consumoCPUPct": 95.82,
-          "consumoCPUSeg": 233.141
+          "consumoMemoriaMB": 2485.5,
+          "consumoCPUPct": 97.44,
+          "consumoCPUSeg": 19.625
         },
         {
           "dia": "2028-12-09",
           "maletas": 2137,
-          "tiempoEjecucion": 359.896,
+          "tiempoEjecucion": 40.709,
           "enviosTotal": 1190,
           "enviosAsignados": 1190,
           "enviosFallidos": 0,
@@ -262,9 +262,9 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 600397.30,
           "tiempoEntregaProm": 524.8,
-          "consumoMemoriaMB": 2988.0,
-          "consumoCPUPct": 95.17,
-          "consumoCPUSeg": 342.500
+          "consumoMemoriaMB": 3291.8,
+          "consumoCPUPct": 96.91,
+          "consumoCPUSeg": 39.453
         }
       ],
       "resumen": {
@@ -276,10 +276,10 @@
         "pctEntregasTiempo": 99.98,
         "costoTotal": 3117905.15,
         "tiempoEntregaProm": 540.3,
-        "tiempoEjecTotal": 1636.051,
-        "memoriaPicoMB": 3161.2,
-        "cpuPromPct": 95.77,
-        "cpuTotalSeg": 1565.188
+        "tiempoEjecTotal": 184.475,
+        "memoriaPicoMB": 3291.8,
+        "cpuPromPct": 96.98,
+        "cpuTotalSeg": 178.563
       }
     },
     {
@@ -288,7 +288,7 @@
         {
           "dia": "2028-12-05",
           "maletas": 2723,
-          "tiempoEjecucion": 639.668,
+          "tiempoEjecucion": 70.293,
           "enviosTotal": 1628,
           "enviosAsignados": 1628,
           "enviosFallidos": 0,
@@ -296,14 +296,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 806013.58,
           "tiempoEntregaProm": 544.2,
-          "consumoMemoriaMB": 2760.5,
-          "consumoCPUPct": 95.58,
-          "consumoCPUSeg": 611.406
+          "consumoMemoriaMB": 3025.3,
+          "consumoCPUPct": 97.52,
+          "consumoCPUSeg": 68.547
         },
         {
           "dia": "2028-12-06",
           "maletas": 2907,
-          "tiempoEjecucion": 936.549,
+          "tiempoEjecucion": 60.968,
           "enviosTotal": 1715,
           "enviosAsignados": 1715,
           "enviosFallidos": 0,
@@ -311,14 +311,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 839431.55,
           "tiempoEntregaProm": 526.9,
-          "consumoMemoriaMB": 1982.4,
-          "consumoCPUPct": 94.67,
-          "consumoCPUSeg": 886.594
+          "consumoMemoriaMB": 3070.4,
+          "consumoCPUPct": 97.75,
+          "consumoCPUSeg": 59.594
         },
         {
           "dia": "2028-12-07",
           "maletas": 2734,
-          "tiempoEjecucion": 864.861,
+          "tiempoEjecucion": 61.070,
           "enviosTotal": 1548,
           "enviosAsignados": 1548,
           "enviosFallidos": 0,
@@ -326,14 +326,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 760321.75,
           "tiempoEntregaProm": 511.6,
-          "consumoMemoriaMB": 2539.2,
-          "consumoCPUPct": 94.58,
-          "consumoCPUSeg": 818.000
+          "consumoMemoriaMB": 2687.8,
+          "consumoCPUPct": 96.51,
+          "consumoCPUSeg": 58.938
         },
         {
           "dia": "2028-12-08",
           "maletas": 2589,
-          "tiempoEjecucion": 740.168,
+          "tiempoEjecucion": 75.059,
           "enviosTotal": 1445,
           "enviosAsignados": 1445,
           "enviosFallidos": 0,
@@ -341,14 +341,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 775588.60,
           "tiempoEntregaProm": 552.1,
-          "consumoMemoriaMB": 2577.3,
-          "consumoCPUPct": 94.64,
-          "consumoCPUSeg": 700.516
+          "consumoMemoriaMB": 2486.9,
+          "consumoCPUPct": 97.71,
+          "consumoCPUSeg": 73.344
         },
         {
           "dia": "2028-12-09",
           "maletas": 3143,
-          "tiempoEjecucion": 860.049,
+          "tiempoEjecucion": 79.772,
           "enviosTotal": 1664,
           "enviosAsignados": 1664,
           "enviosFallidos": 0,
@@ -356,9 +356,9 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 893026.10,
           "tiempoEntregaProm": 527.5,
-          "consumoMemoriaMB": 2330.6,
-          "consumoCPUPct": 94.76,
-          "consumoCPUSeg": 814.969
+          "consumoMemoriaMB": 1922.0,
+          "consumoCPUPct": 97.25,
+          "consumoCPUSeg": 77.578
         }
       ],
       "resumen": {
@@ -370,10 +370,10 @@
         "pctEntregasTiempo": 100.00,
         "costoTotal": 4074381.58,
         "tiempoEntregaProm": 532.1,
-        "tiempoEjecTotal": 4041.295,
-        "memoriaPicoMB": 2760.5,
-        "cpuPromPct": 94.85,
-        "cpuTotalSeg": 3831.484
+        "tiempoEjecTotal": 347.162,
+        "memoriaPicoMB": 3070.4,
+        "cpuPromPct": 97.35,
+        "cpuTotalSeg": 338.000
       }
     },
     {
@@ -382,7 +382,7 @@
         {
           "dia": "2028-12-05",
           "maletas": 3417,
-          "tiempoEjecucion": 1078.374,
+          "tiempoEjecucion": 94.441,
           "enviosTotal": 2106,
           "enviosAsignados": 2106,
           "enviosFallidos": 0,
@@ -390,14 +390,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 969685.34,
           "tiempoEntregaProm": 542.9,
-          "consumoMemoriaMB": 1908.0,
-          "consumoCPUPct": 94.73,
-          "consumoCPUSeg": 1021.547
+          "consumoMemoriaMB": 2193.8,
+          "consumoCPUPct": 97.28,
+          "consumoCPUSeg": 91.875
         },
         {
           "dia": "2028-12-06",
           "maletas": 3508,
-          "tiempoEjecucion": 1014.895,
+          "tiempoEjecucion": 597.767,
           "enviosTotal": 2104,
           "enviosAsignados": 2104,
           "enviosFallidos": 0,
@@ -405,14 +405,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 978641.20,
           "tiempoEntregaProm": 525.2,
-          "consumoMemoriaMB": 2819.6,
-          "consumoCPUPct": 95.79,
-          "consumoCPUSeg": 972.172
+          "consumoMemoriaMB": 3314.5,
+          "consumoCPUPct": 10.15,
+          "consumoCPUSeg": 60.688
         },
         {
           "dia": "2028-12-07",
           "maletas": 3567,
-          "tiempoEjecucion": 789.164,
+          "tiempoEjecucion": 62.755,
           "enviosTotal": 2023,
           "enviosAsignados": 2023,
           "enviosFallidos": 0,
@@ -420,14 +420,14 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 1010078.70,
           "tiempoEntregaProm": 532.1,
-          "consumoMemoriaMB": 2621.8,
-          "consumoCPUPct": 95.22,
-          "consumoCPUSeg": 751.422
+          "consumoMemoriaMB": 2710.5,
+          "consumoCPUPct": 97.65,
+          "consumoCPUSeg": 61.281
         },
         {
           "dia": "2028-12-08",
           "maletas": 3339,
-          "tiempoEjecucion": 925.660,
+          "tiempoEjecucion": 68.639,
           "enviosTotal": 1803,
           "enviosAsignados": 1803,
           "enviosFallidos": 0,
@@ -435,14 +435,14 @@
           "pctEntregasTiempo": 99.89,
           "costoSolucion": 1062603.05,
           "tiempoEntregaProm": 553.5,
-          "consumoMemoriaMB": 3258.8,
-          "consumoCPUPct": 94.44,
-          "consumoCPUSeg": 874.156
+          "consumoMemoriaMB": 2433.7,
+          "consumoCPUPct": 96.56,
+          "consumoCPUSeg": 66.281
         },
         {
           "dia": "2028-12-09",
           "maletas": 3642,
-          "tiempoEjecucion": 712.139,
+          "tiempoEjecucion": 102.060,
           "enviosTotal": 1964,
           "enviosAsignados": 1964,
           "enviosFallidos": 0,
@@ -450,9 +450,9 @@
           "pctEntregasTiempo": 100.00,
           "costoSolucion": 1079345.70,
           "tiempoEntregaProm": 535.1,
-          "consumoMemoriaMB": 3336.9,
-          "consumoCPUPct": 95.72,
-          "consumoCPUSeg": 681.688
+          "consumoMemoriaMB": 2359.6,
+          "consumoCPUPct": 97.23,
+          "consumoCPUSeg": 99.234
         }
       ],
       "resumen": {
@@ -464,10 +464,10 @@
         "pctEntregasTiempo": 99.98,
         "costoTotal": 5100353.99,
         "tiempoEntregaProm": 537.4,
-        "tiempoEjecTotal": 4520.232,
-        "memoriaPicoMB": 3336.9,
-        "cpuPromPct": 95.18,
-        "cpuTotalSeg": 4300.984
+        "tiempoEjecTotal": 925.662,
+        "memoriaPicoMB": 3314.5,
+        "cpuPromPct": 79.78,
+        "cpuTotalSeg": 379.359
       }
     }
   ]

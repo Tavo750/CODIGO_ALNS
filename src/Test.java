@@ -26,7 +26,7 @@ public class Test {
     static final int[] ESCENARIOS_ENVIOS = {2000, 4000, 6000, 8000, 10000};
 
     /** Iteraciones ALNS por día */
-    static final int MAX_ITERACIONES = 250;
+    static final int MAX_ITERACIONES = 50;
 
     /** Días de simulación (periodo de 5 días) */
     static final int DIAS_SIMULACION = 5;
