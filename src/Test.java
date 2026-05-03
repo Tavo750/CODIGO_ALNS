@@ -26,7 +26,7 @@ public class Test {
     static final int[] ESCENARIOS_ENVIOS = {2000, 4000, 6000, 8000, 10000};
 
     /** Iteraciones ALNS por día */
-    static final int MAX_ITERACIONES = 500;
+    static final int MAX_ITERACIONES = 250;
 
     /** Días de simulación (periodo de 5 días) */
     static final int DIAS_SIMULACION = 5;
@@ -198,7 +198,6 @@ public class Test {
                 // Medir CPU después
                 long cpuDespues = cpuSupported ? threadBean.getCurrentThreadCpuTime() : 0;
                 double cpuSeg = (cpuDespues - cpuAntes) / 1_000_000_000.0;
-                double cpuPct = tiempoEjec > 0 ? (cpuSeg / tiempoEjec) * 100.0 : 0;
 
                 // Contar maletas físicas del día
                 int maletasFisicasDia = mejorPlan.getTotalMaletasFisicas();
@@ -209,6 +208,7 @@ public class Test {
 
                 // ── Calcular métricas ──
                 double tiempoEjec = (t1 - t0) / 1000.0;
+                double cpuPct = tiempoEjec > 0 ? (cpuSeg / tiempoEjec) * 100.0 : 0;
                 int asignados = mejorPlan.getTotalMaletasAsignadas();
                 int fallidos = mejorPlan.getMaletasNoAsignadas().size();
                 double pctAsignados = enviosDiaTotal > 0 ? (asignados * 100.0 / enviosDiaTotal) : 0;
