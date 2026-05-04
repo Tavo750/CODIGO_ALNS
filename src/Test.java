@@ -11,28 +11,36 @@ import java.util.*;
  * Test de rendimiento del algoritmo ALNS para la simulación de periodo (5 días)
  * del traslado de maletas de Tasf.B2B.
  *
- * Métricas evaluadas por experimento:
- *   Maletas, Tiempo_Ejecucion, Envios_Total, Envios_Asignados, Envios_Fallidos,
- *   Pct_Asignados, Pct_Entregas_Tiempo, Costo_Solucion, Tiempo_Entrega,
- *   Consumo_Memoria, Consumo_CPU_Pct, Consumo_CPU_seg.
+ * Periodo fijo: 06/06/2026 al 10/06/2026.
+ * Escenarios de carga: 5000, 10000, 15000, 20120 maletas.
+ * Cada escenario se ejecuta 10 veces (corridas) para análisis estadístico.
  *
- * Escenarios de carga: 2000, 4000, 6000, 8000 y 10000 envíos.
+ * Métricas evaluadas por corrida:
+ *   Corrida, Maletas, Tiempo(s), Pedidos, Pedidos_Asignados, Fallidos,
+ *   Pct_Asignados, Pct_Cumple_SLA, Costo, Tiempo_Prom, Memoria_MB, CPU_Pct.
  */
 public class Test {
 
     // ===================== CONFIGURACIÓN =====================
 
-    /** Cantidades de envíos a evaluar */
-    static final int[] ESCENARIOS_ENVIOS = {2000, 4000, 6000, 8000, 10000};
+    /** Cantidades de maletas a evaluar */
+    static final int[] ESCENARIOS_MALETAS = {5000, 10000, 15000, 20120};
+
+    /** Número de corridas (réplicas) por escenario */
+    static final int NUM_CORRIDAS = 10;
 
     /** Iteraciones ALNS por día */
     static final int MAX_ITERACIONES = 50;
 
-    /** Días de simulación (periodo de 5 días) */
+    /** Días de simulación (periodo de 5 días: 06/06/2026 al 10/06/2026) */
     static final int DIAS_SIMULACION = 5;
 
     /** Días extra de vuelos para cubrir SLA intercontinental (48h) */
     static final int DIAS_EXTRA_VUELOS = 2;
+
+    /** Fecha inicio fija: 06/06/2026 (dayIndex desde epoch 2026-01-01) */
+    // Ene:31 + Feb:28 + Mar:31 + Abr:30 + May:31 = 151 + (6-1) = 156
+    static final int DIA_INICIO = TimeUtils.daysBetweenEpoch(2026, 6, 6);
 
     // Parámetros ALNS
     static final double PORCENTAJE_REMOCION_MIN = 0.10;
@@ -51,8 +59,9 @@ public class Test {
         if (cpuSupported) threadBean.setThreadCpuTimeEnabled(true);
 
         System.out.println("╔══════════════════════════════════════════════════════════════════════╗");
-        System.out.println("║   TEST DE RENDIMIENTO ALNS - Simulación Periodo 5 Días             ║");
+        System.out.println("║   TEST DE RENDIMIENTO ALNS - Periodo 06/06/2026 al 10/06/2026      ║");
         System.out.println("║   Tasf.B2B - Traslado de Equipaje Aeroportuario                    ║");
+        System.out.println("║   10 Corridas por escenario para análisis estadístico               ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════════╝");
         System.out.println();
 
@@ -64,41 +73,23 @@ public class Test {
         System.out.printf("  Aeropuertos: %d | Plantillas vuelo: %d | Envios totales: %,d%n%n",
                 aeropuertos.size(), templates.size(), todosEnvios.size());
 
-        // ─── 2. Agrupar por día y seleccionar rango de 5 días con más envíos ───
-        Map<Integer, List<Maleta>> porDia = DataParser.agruparEnviosPorDia(todosEnvios);
-        List<Integer> dias = new ArrayList<>(porDia.keySet());
-        Collections.sort(dias);
-
-        // Buscar ventana de 5 días consecutivos con más envíos
-        int mejorInicio = dias.get(0);
-        int maxEnviosVentana = 0;
-        for (int i = 0; i <= dias.size() - DIAS_SIMULACION; i++) {
-            int inicio = dias.get(i);
-            int fin = inicio + DIAS_SIMULACION - 1;
-            int total = 0;
-            for (int d = inicio; d <= fin; d++) {
-                List<Maleta> lista = porDia.get(d);
-                if (lista != null) total += lista.size();
-            }
-            if (total > maxEnviosVentana) {
-                maxEnviosVentana = total;
-                mejorInicio = inicio;
-            }
-        }
-
-        // Recopilar envíos del periodo seleccionado
-        List<Maleta> enviosPeriodo = new ArrayList<>();
+        // ─── 2. Filtrar envíos del periodo fijo: 06/06/2026 al 10/06/2026 ───
         int[] diasDelPeriodo = new int[DIAS_SIMULACION];
         for (int d = 0; d < DIAS_SIMULACION; d++) {
-            diasDelPeriodo[d] = mejorInicio + d;
+            diasDelPeriodo[d] = DIA_INICIO + d;
+        }
+
+        Map<Integer, List<Maleta>> porDia = DataParser.agruparEnviosPorDia(todosEnvios);
+        List<Maleta> enviosPeriodo = new ArrayList<>();
+        for (int d = 0; d < DIAS_SIMULACION; d++) {
             List<Maleta> lista = porDia.get(diasDelPeriodo[d]);
             if (lista != null) enviosPeriodo.addAll(lista);
         }
 
-        System.out.printf("  Periodo seleccionado: %s a %s (%d envios disponibles)%n",
-                TimeUtils.dayIndexToDate(mejorInicio),
-                TimeUtils.dayIndexToDate(mejorInicio + DIAS_SIMULACION - 1),
-                enviosPeriodo.size());
+        System.out.printf("  Periodo fijo: %s a %s%n",
+                TimeUtils.dayIndexToDate(DIA_INICIO),
+                TimeUtils.dayIndexToDate(DIA_INICIO + DIAS_SIMULACION - 1));
+        System.out.printf("  Envíos disponibles en el periodo: %,d%n", enviosPeriodo.size());
         System.out.println();
 
         // Liberar memoria
@@ -106,247 +97,202 @@ public class Test {
         System.gc();
 
         // ─── 3. Preparar archivo CSV de resultados ───
-        String csvPath = dataDir + "/test_resultados.csv";
+        String csvPath = dataDir + "/test_resultados_alns.csv";
         PrintWriter csv = new PrintWriter(new FileWriter(csvPath));
-        csv.println("Escenario,Dia,Maletas,Tiempo_Ejecucion_seg,Envios_Total,Envios_Asignados,"
-                + "Envios_Fallidos,Pct_Asignados,Pct_Entregas_Tiempo,Costo_Solucion,"
-                + "Tiempo_Entrega_Prom_min,Consumo_Memoria_MB,Consumo_CPU_Pct,Consumo_CPU_seg");
+        csv.println("Corrida,Maletas,Tiempo_seg,Pedidos,Pedidos_Asignados,"
+                + "Fallidos,Pct_Asignados,Pct_Cumple_SLA,Costo,"
+                + "Tiempo_Prom_min,Memoria_MB,CPU_Pct");
 
         // Preparar JSON para dashboard
-        StringBuilder json = new StringBuilder("{\n  \"experimentos\": [\n");
+        StringBuilder json = new StringBuilder("{\n  \"algoritmo\": \"ALNS\",\n");
+        json.append("  \"periodo\": \"2026-06-06 a 2026-06-10\",\n");
+        json.append("  \"corridas\": ").append(NUM_CORRIDAS).append(",\n");
+        json.append("  \"experimentos\": [\n");
 
         // ─── 4. Ejecutar escenarios ───
-        for (int e = 0; e < ESCENARIOS_ENVIOS.length; e++) {
-            int numEnvios = ESCENARIOS_ENVIOS[e];
+        for (int e = 0; e < ESCENARIOS_MALETAS.length; e++) {
+            int numMaletas = ESCENARIOS_MALETAS[e];
 
             System.out.println("╔══════════════════════════════════════════════════════════════╗");
-            System.out.printf( "║  ESCENARIO: %,d envíos en %d días                           ║%n",
-                    numEnvios, DIAS_SIMULACION);
+            System.out.printf( "║  ESCENARIO: %,d maletas | %d corridas | %d días              ║%n",
+                    numMaletas, NUM_CORRIDAS, DIAS_SIMULACION);
             System.out.println("╚══════════════════════════════════════════════════════════════╝");
-
-            // Tomar subconjunto de envíos (shuffle para diversidad)
-            Collections.shuffle(enviosPeriodo, new Random(42 + e));
-            List<Maleta> enviosEscenario = new ArrayList<>(
-                    enviosPeriodo.subList(0, Math.min(numEnvios, enviosPeriodo.size())));
-
-            // Redistribuir los envíos del escenario por día
-            Map<Integer, List<Maleta>> enviosPorDiaEsc = DataParser.agruparEnviosPorDia(enviosEscenario);
-
-            // Variables acumuladas del escenario
-            int totalEnviosProc = 0, totalAsignados = 0, totalFallidos = 0;
-            int totalATiempo = 0, totalConRuta = 0;
-            int totalMaletasFisicas = 0;
-            double costoAcumulado = 0;
-            long tiempoEntregaAcumulado = 0;
-            int rutasConTiempo = 0;
-            double tiempoEjecTotal = 0;
-            double cpuTotal = 0;
-            double cpuPctAcumulado = 0;
-            double memoriaPico = 0;
-            List<Maleta> arrastre = new ArrayList<>();
 
             if (e > 0) json.append(",\n");
             json.append("    {\n");
-            json.append("      \"numEnvios\": ").append(numEnvios).append(",\n");
-            json.append("      \"dias\": [\n");
+            json.append("      \"maletas\": ").append(numMaletas).append(",\n");
+            json.append("      \"corridas\": [\n");
 
-            for (int d = 0; d < DIAS_SIMULACION; d++) {
-                int dayIndex = diasDelPeriodo[d];
-                List<Maleta> enviosDia = enviosPorDiaEsc.getOrDefault(dayIndex, new ArrayList<>());
+            // ─── Ejecutar N corridas para este escenario ───
+            for (int corrida = 1; corrida <= NUM_CORRIDAS; corrida++) {
+                System.out.printf("%n  ── Corrida %d/%d (escenario %,d maletas) ──%n",
+                        corrida, NUM_CORRIDAS, numMaletas);
 
-                // Agregar envíos de arrastre
-                List<Maleta> enviosProcesar = new ArrayList<>(arrastre);
-                enviosProcesar.addAll(enviosDia);
-                arrastre.clear();
+                // Tomar subconjunto de envíos (shuffle con semilla diferente por corrida)
+                Collections.shuffle(enviosPeriodo, new Random(42 + e * 1000 + corrida));
+                List<Maleta> enviosEscenario = new ArrayList<>(
+                        enviosPeriodo.subList(0, Math.min(numMaletas, enviosPeriodo.size())));
 
-                int enviosDiaTotal = enviosProcesar.size();
-                totalEnviosProc += enviosDiaTotal;
+                // Redistribuir los envíos del escenario por día
+                Map<Integer, List<Maleta>> enviosPorDiaEsc = DataParser.agruparEnviosPorDia(enviosEscenario);
 
-                System.out.printf("%n  ── Día %d/%d: %s | %,d envíos ──%n",
-                        d + 1, DIAS_SIMULACION, TimeUtils.dayIndexToDate(dayIndex), enviosDiaTotal);
+                // Variables acumuladas de la corrida
+                int totalPedidos = 0, totalAsignados = 0, totalFallidos = 0;
+                int totalATiempo = 0;
+                int totalMaletasFisicas = 0;
+                double costoAcumulado = 0;
+                long tiempoEntregaAcumulado = 0;
+                int rutasConTiempo = 0;
+                double memoriaPico = 0;
+                List<Maleta> arrastre = new ArrayList<>();
 
-                // Instanciar vuelos
-                List<Vuelo> vuelos = DataParser.instanciarVuelos(
-                        templates, dayIndex, dayIndex + DIAS_EXTRA_VUELOS, aeropuertos);
-                FlightIndex flightIndex = new FlightIndex(vuelos);
-
-                // Medir memoria antes
+                // Medir tiempo total de ejecución y CPU de la corrida
                 System.gc();
-                long memAntes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+                long cpuAntesCorrida = cpuSupported ? threadBean.getCurrentThreadCpuTime() : 0;
+                long t0Corrida = System.currentTimeMillis();
 
-                // Medir CPU antes
-                long cpuAntes = cpuSupported ? threadBean.getCurrentThreadCpuTime() : 0;
+                for (int d = 0; d < DIAS_SIMULACION; d++) {
+                    int dayIndex = diasDelPeriodo[d];
+                    List<Maleta> enviosDia = enviosPorDiaEsc.getOrDefault(dayIndex, new ArrayList<>());
 
-                // Generar solución inicial
-                long t0 = System.currentTimeMillis();
-                PlanDeRutas planInicial = SolutionGenerator.generarPlanInicial(
-                        enviosProcesar, flightIndex, aeropuertos);
+                    // Agregar envíos de arrastre
+                    List<Maleta> enviosProcesar = new ArrayList<>(arrastre);
+                    enviosProcesar.addAll(enviosDia);
+                    arrastre.clear();
 
-                // Ejecutar ALNS
-                PlanDeRutas mejorPlan;
-                if (planInicial.getTotalMaletasAsignadas() > 0) {
-                    ALNSEngine engine = new ALNSEngine(
-                            MAX_ITERACIONES, PORCENTAJE_REMOCION_MIN, PORCENTAJE_REMOCION_MAX,
-                            TEMPERATURA_INICIAL, TASA_ENFRIAMIENTO, TASA_REACCION,
-                            PERIODO_ACTUALIZACION, flightIndex);
-                    mejorPlan = engine.ejecutar(planInicial);
-                } else {
-                    mejorPlan = planInicial;
+                    int enviosDiaTotal = enviosProcesar.size();
+                    totalPedidos += enviosDiaTotal;
+
+                    // Instanciar vuelos
+                    List<Vuelo> vuelos = DataParser.instanciarVuelos(
+                            templates, dayIndex, dayIndex + DIAS_EXTRA_VUELOS, aeropuertos);
+                    FlightIndex flightIndex = new FlightIndex(vuelos);
+
+                    // Medir memoria antes
+                    long memAntes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+
+                    // Generar solución inicial
+                    PlanDeRutas planInicial = SolutionGenerator.generarPlanInicial(
+                            enviosProcesar, flightIndex, aeropuertos);
+
+                    // Ejecutar ALNS
+                    PlanDeRutas mejorPlan;
+                    if (planInicial.getTotalMaletasAsignadas() > 0) {
+                        ALNSEngine engine = new ALNSEngine(
+                                MAX_ITERACIONES, PORCENTAJE_REMOCION_MIN, PORCENTAJE_REMOCION_MAX,
+                                TEMPERATURA_INICIAL, TASA_ENFRIAMIENTO, TASA_REACCION,
+                                PERIODO_ACTUALIZACION, flightIndex);
+                        mejorPlan = engine.ejecutar(planInicial);
+                    } else {
+                        mejorPlan = planInicial;
+                    }
+
+                    // Contar maletas físicas del día
+                    int maletasFisicasDia = mejorPlan.getTotalMaletasFisicas();
+
+                    // Medir memoria después
+                    long memDespues = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+                    double memUsadaMB = Math.max(memDespues, memAntes) / (1024.0 * 1024.0);
+
+                    // ── Calcular métricas del día ──
+                    int asignados = mejorPlan.getTotalMaletasAsignadas();
+                    int fallidos = mejorPlan.getMaletasNoAsignadas().size();
+                    double costoSolucion = CostCalculator.calcularCosto(mejorPlan);
+
+                    // Entregas a tiempo y tiempo promedio de entrega
+                    int aTiempo = 0;
+                    long sumaTiempoEntrega = 0;
+                    int countRutas = 0;
+                    for (Map.Entry<Maleta, Ruta> entry : mejorPlan.getAsignaciones().entrySet()) {
+                        Maleta m = entry.getKey();
+                        Ruta r = entry.getValue();
+                        long horaLlegada = r.getHoraLlegadaFinal();
+                        if (!m.isSLAExpirado(horaLlegada)) aTiempo++;
+                        sumaTiempoEntrega += r.getTiempoTotal();
+                        countRutas++;
+                    }
+
+                    // Acumular
+                    totalAsignados += asignados;
+                    totalFallidos += fallidos;
+                    totalATiempo += aTiempo;
+                    costoAcumulado += costoSolucion;
+                    tiempoEntregaAcumulado += sumaTiempoEntrega;
+                    rutasConTiempo += countRutas;
+                    totalMaletasFisicas += maletasFisicasDia;
+                    if (memUsadaMB > memoriaPico) memoriaPico = memUsadaMB;
+
+                    // Arrastre
+                    arrastre.addAll(mejorPlan.getMaletasNoAsignadas());
+
+                    // Liberar
+                    vuelos = null;
+                    flightIndex = null;
+                    planInicial = null;
+                    mejorPlan = null;
                 }
-                long t1 = System.currentTimeMillis();
 
-                // Medir CPU después
-                long cpuDespues = cpuSupported ? threadBean.getCurrentThreadCpuTime() : 0;
-                double cpuSeg = (cpuDespues - cpuAntes) / 1_000_000_000.0;
+                long t1Corrida = System.currentTimeMillis();
+                long cpuDespuesCorrida = cpuSupported ? threadBean.getCurrentThreadCpuTime() : 0;
 
-                // Contar maletas físicas del día
-                int maletasFisicasDia = mejorPlan.getTotalMaletasFisicas();
+                // ── Métricas consolidadas de la corrida ──
+                double tiempoEjecCorrida = (t1Corrida - t0Corrida) / 1000.0;
+                double cpuSegCorrida = (cpuDespuesCorrida - cpuAntesCorrida) / 1_000_000_000.0;
+                double cpuPctCorrida = tiempoEjecCorrida > 0 ? (cpuSegCorrida / tiempoEjecCorrida) * 100.0 : 0;
+                double pctAsigGlobal = totalPedidos > 0 ? (totalAsignados * 100.0 / totalPedidos) : 0;
+                double pctCumpleSLA = totalAsignados > 0 ? (totalATiempo * 100.0 / totalAsignados) : 0;
+                double tiempoEntregaProm = rutasConTiempo > 0 ? (tiempoEntregaAcumulado / (double) rutasConTiempo) : 0;
 
-                // Medir memoria después
-                long memDespues = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-                double memUsadaMB = Math.max(memDespues, memAntes) / (1024.0 * 1024.0);
-
-                // ── Calcular métricas ──
-                double tiempoEjec = (t1 - t0) / 1000.0;
-                double cpuPct = tiempoEjec > 0 ? (cpuSeg / tiempoEjec) * 100.0 : 0;
-                int asignados = mejorPlan.getTotalMaletasAsignadas();
-                int fallidos = mejorPlan.getMaletasNoAsignadas().size();
-                double pctAsignados = enviosDiaTotal > 0 ? (asignados * 100.0 / enviosDiaTotal) : 0;
-                double costoSolucion = CostCalculator.calcularCosto(mejorPlan);
-
-                // Entregas a tiempo y tiempo promedio de entrega
-                int aTiempo = 0;
-                long sumaTiempoEntrega = 0;
-                int countRutas = 0;
-                for (Map.Entry<Maleta, Ruta> entry : mejorPlan.getAsignaciones().entrySet()) {
-                    Maleta m = entry.getKey();
-                    Ruta r = entry.getValue();
-                    long horaLlegada = r.getHoraLlegadaFinal();
-                    if (!m.isSLAExpirado(horaLlegada)) aTiempo++;
-                    sumaTiempoEntrega += r.getTiempoTotal();
-                    countRutas++;
-                }
-                double pctATiempo = asignados > 0 ? (aTiempo * 100.0 / asignados) : 0;
-                double tiempoEntregaProm = countRutas > 0 ? (sumaTiempoEntrega / (double) countRutas) : 0;
-
-                // Acumular
-                totalAsignados += asignados;
-                totalFallidos += fallidos;
-                totalATiempo += aTiempo;
-                totalConRuta += asignados;
-                costoAcumulado += costoSolucion;
-                tiempoEntregaAcumulado += sumaTiempoEntrega;
-                rutasConTiempo += countRutas;
-                totalMaletasFisicas += maletasFisicasDia;
-                tiempoEjecTotal += tiempoEjec;
-                cpuTotal += cpuSeg;
-                cpuPctAcumulado += cpuPct;
-                if (memUsadaMB > memoriaPico) memoriaPico = memUsadaMB;
-
-                // Arrastre
-                arrastre.addAll(mejorPlan.getMaletasNoAsignadas());
-
-                // Imprimir resultados del día
-                System.out.printf("     Maletas (físicas):    %d%n", maletasFisicasDia);
-                System.out.printf("     Tiempo ejecución:     %.3f seg%n", tiempoEjec);
-                System.out.printf("     Envíos total:         %d%n", enviosDiaTotal);
-                System.out.printf("     Envíos asignados:     %d%n", asignados);
-                System.out.printf("     Envíos fallidos:      %d%n", fallidos);
-                System.out.printf("     Pct asignados:        %.2f%%%n", pctAsignados);
-                System.out.printf("     Pct entregas a tiempo:%.2f%%%n", pctATiempo);
-                System.out.printf("     Costo solución:       %.2f%n", costoSolucion);
-                System.out.printf("     Tiempo entrega prom:  %.1f min%n", tiempoEntregaProm);
-                System.out.printf("     Memoria usada:        %.1f MB%n", memUsadaMB);
-                System.out.printf("     CPU usado:            %.2f%% (%.3f seg)%n", cpuPct, cpuSeg);
+                // Imprimir resultados de la corrida
+                System.out.printf("     Corrida:              %d%n", corrida);
+                System.out.printf("     Maletas:              %,d%n", totalMaletasFisicas);
+                System.out.printf("     Tiempo ejecución:     %.2f seg%n", tiempoEjecCorrida);
+                System.out.printf("     Pedidos:              %,d%n", totalPedidos);
+                System.out.printf("     Pedidos asignados:    %,d%n", totalAsignados);
+                System.out.printf("     Fallidos:             %,d%n", totalFallidos);
+                System.out.printf("     %% Asignados:          %.2f%%%n", pctAsigGlobal);
+                System.out.printf("     %% Cumple SLA:         %.2f%%%n", pctCumpleSLA);
+                System.out.printf("     Costo:                %,.2f%n", costoAcumulado);
+                System.out.printf("     Tiempo entrega prom:  %.2f min%n", tiempoEntregaProm);
+                System.out.printf("     Memoria pico:         %.2f MB%n", memoriaPico);
+                System.out.printf("     CPU:                  %.2f%%%n", cpuPctCorrida);
 
                 // Escribir CSV
-                csv.printf("%d,%s,%d,%.3f,%d,%d,%d,%.2f,%.2f,%.2f,%.1f,%.1f,%.2f,%.3f%n",
-                        numEnvios, TimeUtils.dayIndexToDate(dayIndex), maletasFisicasDia,
-                        tiempoEjec, enviosDiaTotal, asignados, fallidos,
-                        pctAsignados, pctATiempo, costoSolucion,
-                        tiempoEntregaProm, memUsadaMB, cpuPct, cpuSeg);
+                csv.printf("%d,%d,%.2f,%d,%d,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f%n",
+                        corrida, numMaletas, tiempoEjecCorrida,
+                        totalPedidos, totalAsignados, totalFallidos,
+                        pctAsigGlobal, pctCumpleSLA, costoAcumulado,
+                        tiempoEntregaProm, memoriaPico, cpuPctCorrida);
 
-                // JSON por día
-                if (d > 0) json.append(",\n");
+                // JSON por corrida
+                if (corrida > 1) json.append(",\n");
                 json.append("        {\n");
-                json.append("          \"dia\": \"").append(TimeUtils.dayIndexToDate(dayIndex)).append("\",\n");
-                json.append(String.format("          \"maletas\": %d,\n", maletasFisicasDia));
-                json.append(String.format("          \"tiempoEjecucion\": %.3f,\n", tiempoEjec));
-                json.append(String.format("          \"enviosTotal\": %d,\n", enviosDiaTotal));
-                json.append(String.format("          \"enviosAsignados\": %d,\n", asignados));
-                json.append(String.format("          \"enviosFallidos\": %d,\n", fallidos));
-                json.append(String.format("          \"pctAsignados\": %.2f,\n", pctAsignados));
-                json.append(String.format("          \"pctEntregasTiempo\": %.2f,\n", pctATiempo));
-                json.append(String.format("          \"costoSolucion\": %.2f,\n", costoSolucion));
-                json.append(String.format("          \"tiempoEntregaProm\": %.1f,\n", tiempoEntregaProm));
-                json.append(String.format("          \"consumoMemoriaMB\": %.1f,\n", memUsadaMB));
-                json.append(String.format("          \"consumoCPUPct\": %.2f,\n", cpuPct));
-                json.append(String.format("          \"consumoCPUSeg\": %.3f\n", cpuSeg));
+                json.append(String.format("          \"corrida\": %d,\n", corrida));
+                json.append(String.format("          \"maletas\": %d,\n", numMaletas));
+                json.append(String.format("          \"tiempoSeg\": %.2f,\n", tiempoEjecCorrida));
+                json.append(String.format("          \"pedidos\": %d,\n", totalPedidos));
+                json.append(String.format("          \"pedidosAsignados\": %d,\n", totalAsignados));
+                json.append(String.format("          \"fallidos\": %d,\n", totalFallidos));
+                json.append(String.format("          \"pctAsignados\": %.2f,\n", pctAsigGlobal));
+                json.append(String.format("          \"pctCumpleSLA\": %.2f,\n", pctCumpleSLA));
+                json.append(String.format("          \"costo\": %.2f,\n", costoAcumulado));
+                json.append(String.format("          \"tiempoProm\": %.2f,\n", tiempoEntregaProm));
+                json.append(String.format("          \"memoriaMB\": %.2f,\n", memoriaPico));
+                json.append(String.format("          \"cpuPct\": %.2f\n", cpuPctCorrida));
                 json.append("        }");
 
-                // Liberar
-                vuelos = null;
-                flightIndex = null;
-                planInicial = null;
-                mejorPlan = null;
+                System.gc();
             }
 
-            json.append("\n      ],\n");
-
-            // ── Resumen del escenario ──
-            double pctAsigGlobal = totalEnviosProc > 0 ? (totalAsignados * 100.0 / totalEnviosProc) : 0;
-            double pctATiempoGlobal = totalConRuta > 0 ? (totalATiempo * 100.0 / totalConRuta) : 0;
-            double tiempoEntregaGlobal = rutasConTiempo > 0 ? (tiempoEntregaAcumulado / (double) rutasConTiempo) : 0;
-
-            double cpuPctPromedio = DIAS_SIMULACION > 0 ? (cpuPctAcumulado / DIAS_SIMULACION) : 0;
-
-            json.append(String.format("      \"resumen\": {\n"));
-            json.append(String.format("        \"totalEnvios\": %d,\n", totalEnviosProc));
-            json.append(String.format("        \"totalMaletas\": %d,\n", totalMaletasFisicas));
-            json.append(String.format("        \"totalAsignados\": %d,\n", totalAsignados));
-            json.append(String.format("        \"totalFallidos\": %d,\n", totalFallidos));
-            json.append(String.format("        \"pctAsignados\": %.2f,\n", pctAsigGlobal));
-            json.append(String.format("        \"pctEntregasTiempo\": %.2f,\n", pctATiempoGlobal));
-            json.append(String.format("        \"costoTotal\": %.2f,\n", costoAcumulado));
-            json.append(String.format("        \"tiempoEntregaProm\": %.1f,\n", tiempoEntregaGlobal));
-            json.append(String.format("        \"tiempoEjecTotal\": %.3f,\n", tiempoEjecTotal));
-            json.append(String.format("        \"memoriaPicoMB\": %.1f,\n", memoriaPico));
-            json.append(String.format("        \"cpuPromPct\": %.2f,\n", cpuPctPromedio));
-            json.append(String.format("        \"cpuTotalSeg\": %.3f\n", cpuTotal));
-            json.append("      }\n");
+            json.append("\n      ]\n");
             json.append("    }");
-
-            // Escribir fila resumen en CSV
-            csv.printf("%d,RESUMEN,%d,%.3f,%d,%d,%d,%.2f,%.2f,%.2f,%.1f,%.1f,%.2f,%.3f%n",
-                    numEnvios, totalMaletasFisicas,
-                    tiempoEjecTotal, totalEnviosProc, totalAsignados, totalFallidos,
-                    pctAsigGlobal, pctATiempoGlobal, costoAcumulado,
-                    tiempoEntregaGlobal, memoriaPico, cpuPctPromedio, cpuTotal);
 
             System.out.println();
             System.out.println("┌──────────────────────────────────────────────────────────────┐");
-            System.out.printf( "│  RESUMEN ESCENARIO %,d envíos                                │%n", numEnvios);
-            System.out.println("├──────────────────────────────────────────────────────────────┤");
-            System.out.printf( "│  Envíos procesados:      %,10d                          │%n", totalEnviosProc);
-            System.out.printf( "│  Envíos asignados:       %,10d (%.2f%%)               │%n", totalAsignados, pctAsigGlobal);
-            System.out.printf( "│  Envíos fallidos:        %,10d                          │%n", totalFallidos);
-            System.out.printf( "│  Entregas a tiempo:      %9.2f%%                         │%n", pctATiempoGlobal);
-            System.out.printf( "│  Costo total:            %,14.2f                      │%n", costoAcumulado);
-            System.out.printf( "│  Tiempo entrega prom:    %10.1f min                      │%n", tiempoEntregaGlobal);
-            System.out.printf( "│  Tiempo ejecución total: %10.3f seg                      │%n", tiempoEjecTotal);
-            System.out.printf( "│  Memoria pico:           %10.1f MB                       │%n", memoriaPico);
-            System.out.printf( "│  Maletas físicas total:  %,10d                          │%n", totalMaletasFisicas);
-            System.out.printf( "│  CPU total:              %10.3f seg (prom %.2f%%)          │%n", cpuTotal, cpuPctPromedio);
+            System.out.printf( "│  ESCENARIO %,d maletas COMPLETADO (%d corridas)              │%n",
+                    numMaletas, NUM_CORRIDAS);
             System.out.println("└──────────────────────────────────────────────────────────────┘");
             System.out.println();
-
-            // Reset acumuladores para siguiente escenario
-            totalEnviosProc = 0; totalAsignados = 0; totalFallidos = 0;
-            totalATiempo = 0; totalConRuta = 0; totalMaletasFisicas = 0;
-            costoAcumulado = 0; tiempoEntregaAcumulado = 0; rutasConTiempo = 0;
-            tiempoEjecTotal = 0; cpuTotal = 0; cpuPctAcumulado = 0; memoriaPico = 0;
-
-            System.gc();
         }
 
         json.append("\n  ]\n}\n");
@@ -355,7 +301,7 @@ public class Test {
         System.out.printf(">>> Resultados CSV exportados a: %s%n", csvPath);
 
         // Exportar JSON
-        String jsonPath = dataDir + "/test_rendimiento.json";
+        String jsonPath = dataDir + "/test_resultados_alns.json";
         try (PrintWriter pw = new PrintWriter(new FileWriter(jsonPath))) {
             pw.print(json.toString());
         }
@@ -368,30 +314,40 @@ public class Test {
     }
 
     /**
-     * Lee el CSV generado e imprime una tabla comparativa de los resúmenes.
+     * Lee el CSV generado e imprime una tabla comparativa estilo Excel.
+     * Formato: Corrida | Maletas | Tiempo(s) | Pedidos | Pedidos Asignados | Fallidos |
+     *          % Asignados | %Cumple SLA | Costo | Tiempo Prom | Memoria (MB) | CPU %
      */
     private static void imprimirTablaComparativa(String csvPath) throws IOException {
         System.out.println();
-        System.out.println("╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                           TABLA COMPARATIVA DE ESCENARIOS                                                     ║");
-        System.out.println("╠═══════════╦═════════╦═══════════╦══════════╦══════════╦══════════╦══════════╦════════════╦══════════╦═════════╦═════════╦══════════╣");
-        System.out.println("║ Escenario ║ Maletas ║ Asignados ║ Fallidos ║ %Asig    ║ %Tiempo  ║ Costo   ║ T.Entrega  ║ T.Ejec   ║ Mem MB  ║ CPU %   ║ CPU seg  ║");
-        System.out.println("╠═══════════╬═════════╬═══════════╬══════════╬══════════╬══════════╬══════════╬════════════╬══════════╬═════════╬═════════╬══════════╣");
+        System.out.println("╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                              RESULTADOS ALNS - Periodo 06/06/2026 al 10/06/2026                                      ║");
+        System.out.println("╠═════════╦═════════╦══════════╦═════════╦══════════════╦══════════╦════════════╦════════════╦════════════╦══════════╦══════════╦════════╣");
+        System.out.println("║ Corrida ║ Maletas ║ Tiempo(s)║ Pedidos ║ P.Asignados  ║ Fallidos ║ %Asignados ║ %CumpleSLA ║   Costo    ║ T.Prom   ║ Mem(MB)  ║ CPU %  ║");
+        System.out.println("╠═════════╬═════════╬══════════╬═════════╬══════════════╬══════════╬════════════╬════════════╬════════════╬══════════╬══════════╬════════╣");
 
         try (BufferedReader br = new BufferedReader(new FileReader(csvPath))) {
             String linea;
             br.readLine(); // skip header
+            int currentMaletas = -1;
             while ((linea = br.readLine()) != null) {
                 String[] cols = linea.split(",");
-                if (cols.length >= 14 && cols[1].equals("RESUMEN")) {
-                    System.out.printf("║ %9s ║ %7s ║ %9s ║ %8s ║ %7s%% ║ %7s%% ║ %8s ║ %8s m ║ %7s s ║ %7s ║ %6s%% ║ %7s s ║%n",
-                            cols[0], cols[2], cols[5], cols[6], cols[7], cols[8],
-                            abreviar(cols[9]), cols[10], cols[3], cols[11], cols[12], cols[13]);
+                if (cols.length >= 12) {
+                    int maletas = Integer.parseInt(cols[1]);
+                    // Separador entre escenarios
+                    if (maletas != currentMaletas && currentMaletas != -1) {
+                        System.out.println("╠═════════╬═════════╬══════════╬═════════╬══════════════╬══════════╬════════════╬════════════╬════════════╬══════════╬══════════╬════════╣");
+                    }
+                    currentMaletas = maletas;
+
+                    System.out.printf("║ %7s ║ %7s ║ %8s ║ %7s ║ %12s ║ %8s ║ %9s%% ║ %9s%% ║ %10s ║ %8s ║ %8s ║ %5s%% ║%n",
+                            cols[0], cols[1], cols[2], cols[3], cols[4], cols[5],
+                            cols[6], cols[7], abreviar(cols[8]), cols[9], cols[10], cols[11]);
                 }
             }
         }
 
-        System.out.println("╚═══════════╩═════════╩═══════════╩══════════╩══════════╩══════════╩══════════╩════════════╩══════════╩═════════╩═════════╩══════════╝");
+        System.out.println("╚═════════╩═════════╩══════════╩═════════╩══════════════╩══════════╩════════════╩════════════╩════════════╩══════════╩══════════╩════════╝");
     }
 
     /** Abrevia números grandes para la tabla */
