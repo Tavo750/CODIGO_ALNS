@@ -20,7 +20,7 @@ import java.util.*;
 public class Main {
 
     // === Parámetros ALNS (configurables) ===
-    private static final int MAX_ITERACIONES = 500;
+    private static final int MAX_ITERACIONES = 50;
     private static final double PORCENTAJE_REMOCION_MIN = 0.10;
     private static final double PORCENTAJE_REMOCION_MAX = 0.40;
     private static final double TEMPERATURA_INICIAL = 100.0;
